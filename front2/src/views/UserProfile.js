@@ -220,9 +220,7 @@ function UserProfile() {
               <Card>
                 <CardHeader>
                   <CardTitle tag="h4">liste des demandes</CardTitle>
-                  <button>
-                    Exporter en CSV
-                  </button>
+                  
                 </CardHeader>
                 <CardBody>
                   <Table className="tablesorter" responsive>
@@ -302,9 +300,7 @@ function UserProfile() {
             <Card>
               <CardHeader>
                 <CardTitle tag="h4">liste des demandes</CardTitle>
-                <button>
-                  Exporter en CSV
-                </button>
+                    
               </CardHeader>
               <CardBody>
                 <Table className="tablesorter" responsive>

@@ -16,15 +16,28 @@ import {
   Input,
   Row,
   Col,
+  Alert,
 } from "reactstrap";
 import Swal from "sweetalert2";
 import API_IP from "./config";
 import { Aos } from "aos";
 import { backgroundColors } from "contexts/BackgroundColorContext";
 import { height } from "@mui/system";
+import * as XLSX from 'xlsx';
+import { Tab } from "@mui/icons-material";
+
+let tab=[]
+
 
 let tokenLocal = JSON.parse(localStorage.getItem("token"));
 function AjoutMateriels() {
+  const [typeError, setTypeError] = useState(null);
+
+  const [excelFile, setExcelFile] = useState(null);
+
+  const [excelData, setExcelData] = useState({
+
+  });
 
   const [values, setValues] = useState({
     groupe: 'E',
@@ -73,6 +86,200 @@ function AjoutMateriels() {
         window.location.reload();
   }
 
+  /*const handleFileUpload = (event) => {
+    let selectedfile = event.target.files[0];
+
+    /*
+    const reader = new FileReader();
+   
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+  
+      // Accédez aux feuilles du classeur et traitez les données ici
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  
+      //long 
+     // ${jsonData.length}  
+     //-ligne0
+     //data  1->(${jsonData.length}-1)
+     /*
+    groupe: 'E',
+    famille: 'AUDIOVISUEL',
+    categorie: 'Ecran',
+    marque: '',
+    status: 'libre',
+    etat: 'actif',
+    fournisseur: '',
+    prixmateriel: '',
+    dateinventaire: '',
+    numerofacture: '',
+    region: 'RALM',
+    nomconsommable: '',
+    numero:'',
+    texte:''
+     */ 
+  
+   // setValues({ ...values, famille:${jsonData[0]})
+
+      /*
+      i>0
+      ${jsonData[i][0]}==numero
+      ${jsonData[i][1]}==groupe
+      ${jsonData[i][2]}==categorie
+      ${jsonData[i][3]}==marque
+      ${jsonData[i][4]}==etat
+      ${jsonData[i][5]}==date
+      ${jsonData[i][6]}==status
+      ${jsonData[i][7]}==localisation
+      ${jsonData[i][8]}==commentaire
+    
+   let i=0;
+   
+     for (i=1;i++;i<=(jsonData.length)){
+      setValues({ ...values, 
+        groupe: jsonData[i][1],
+        famille: 'sans',
+        categorie: jsonData[i][2],
+        marque:jsonData[i][3],
+        status:jsonData[i][6],
+        etat: jsonData[i][4],
+        fournisseur:'chine',
+        prixmateriel:1,
+        dateinventaire:jsonData[i][5],
+        numerofacture: '111',
+        region:jsonData[i][7],
+        nomconsommable:'sans c',
+        numero:'111',
+        texte:jsonData[i][8]})
+        alert(jsonData[3][4]);
+     }
+
+
+    };
+  
+    reader.readAsArrayBuffer(blob);
+
+  };
+*/
+// onchange event
+const handleFile=(e)=>{
+  let fileTypes = ['application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv'];
+  let selectedFile = e.target.files[0];
+  if(selectedFile){
+    if(selectedFile&&fileTypes.includes(selectedFile.type)){
+      setTypeError(null);
+      let reader = new FileReader();
+      reader.readAsArrayBuffer(selectedFile);
+      reader.onload=(e)=>{
+        setExcelFile(e.target.result);
+       
+      }
+    }
+    else{
+      setTypeError('fichier Excel uniquement');
+      setExcelFile(null);
+    }
+  }
+  else{
+    console.log('Please select your file');
+  }
+}
+
+// submit event
+const handleFileSubmit=(e)=>{
+e.preventDefault();
+  if(excelFile!==null){
+    const workbook = XLSX.read(excelFile,{type: 'buffer'});
+    const worksheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[worksheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+    setExcelData(data);
+    let i=0
+    
+    data.forEach((row) => {
+   
+   
+      Object.values(row).forEach((value) => {
+      tab.push(value)
+   }
+ )
+    
+     
+  }
+    );
+   let j=0
+    while(j<tab.length){
+      //alert(`${tab[j]} - ${tab[j+1]} - ${tab[j+2]}-${tab[j+3]} - ${tab[j+4]} - ${tab[j+5]} ${tab[j]+6} - ${tab[j+7]} - ${tab[j+8]}  - ${tab[j+9]}- ${tab[j+10]}- ${tab[j+11]}- ${tab[j+12]}`)
+      const excelDateValue =tab[j+8]; // La valeur de date provenant d'Excel
+
+      // Convertir la valeur de date Excel en nombre de millisecondes depuis l'époque d'Excel
+      const excelEpochStart = new Date('1900-01-01');
+      const excelDateMilliseconds = excelEpochStart.getTime() + (excelDateValue - 1) * 24 * 60 * 60 * 1000;
+    
+      // Créer un objet Date à partir de la valeur de millisecondes
+      const dateObj = new Date(excelDateMilliseconds);
+        // Obtenir les composants de la date
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  // Format de la date pour la base de données
+  const formattedDate = `${year}-${month}-${day}`;
+
+      const newValues = {
+        groupe: tab[j],
+        famille: tab[j + 1],
+        categorie: tab[j + 2],
+        marque: tab[j + 3],
+        status: tab[j + 4],
+        etat: tab[j + 5],
+        fournisseur: tab[j + 6],
+        prixmateriel:tab[j + 7].toString(),
+        dateinventaire: formattedDate,
+        numerofacture: '',
+        region: tab[j + 10],
+        nomconsommable: '',
+        numero: tab[j + 11].toString(),
+        texte: tab[j + 12]
+      };
+       j+=13
+      //setValues({ ...values, ...newValues });
+      const updatedValues = { ...values, ...newValues };
+      axios.post(`http://${API_IP}:3000/api/ajoutmateriel`,  updatedValues)
+        .then(response => {
+          // La requête POST a été effectuée avec succès
+          console.log(response.data);
+          Swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'materiel importé avec succes',
+            showConfirmButton: false,
+            timer: 30000
+          })
+          
+          navigate('../AfficheMateriels', { replace: true })
+          window.location.reload();
+        })
+        .catch(error => {
+          // Une erreur s'est produite lors de la requête POST
+          console.error(error);
+        });
+      
+     
+    }
+      
+    
+      
+  
+  
+       
+
+       
+
+
+   }
+}
   return (
     <>
 
@@ -84,7 +291,13 @@ function AjoutMateriels() {
               <CardHeader>
 
                 <h5 className="title">Ajout de nouveau materiel</h5>
-               
+                
+                      <Input type="file" className="form-control" required onChange={handleFile} />
+                      <Button type="submit" onClick={handleFileSubmit} className="btn btn-success btn-md">UPLOAD</Button>
+                      {typeError&&(
+                             <div className="alert alert-danger" role="alert">{typeError}</div>
+                             )}
+                
               </CardHeader>
               <form onSubmit={handleSubmit}>
                 <CardBody>
@@ -149,6 +362,7 @@ function AjoutMateriels() {
                       </FormGroup>
                       <label>numero</label>
                       <Input
+                      required
                         defaultValue="null"
                         placeholder="xxx"
                         type="number"
@@ -167,6 +381,7 @@ function AjoutMateriels() {
                       <label>marque</label>
                       
                       <Input
+                      required
                         defaultValue=""
                         placeholder="sony,hp,..."
                         type="text"

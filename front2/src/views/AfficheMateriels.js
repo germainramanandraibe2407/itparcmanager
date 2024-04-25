@@ -19,6 +19,9 @@ import API_IP from "./config";
 import { useNavigate } from "react-router-dom";
 import Aos from "aos";
 import { read, utils, writeFile } from 'xlsx';
+//import
+import XLSX from 'xlsx';
+
 import dayjs, { Dayjs } from "dayjs";
 import { alertClasses } from "@mui/material";
 import { CardFooter, FormGroup, Modal } from "react-bootstrap";
@@ -1174,11 +1177,12 @@ let totalmat = JSON.parse(localStorage.getItem("totalmat")*/
                               <option value="AUDIOVISUEL">AUDIOVISUEL</option>
                               <option value="CONSOMMABLE">CONSOMMABLE</option>
                             </select>
+                            {tokenLocal.role == "administrateur" && (
                             <select value={selectedFilter.sta} onChange={e => setSelectedFilter({ ...selectedFilter,sta: e.target.value })}>
                               <option  selected="selected" value="">--Status--</option>
                               <option value="libre">libre</option>
                               <option value="utilisé">utilisé</option>
-                            </select>
+                            </select>)}
                             <select value={selectedFilter.gro} onChange={e => setSelectedFilter({ ...selectedFilter,gro: e.target.value })}>
                               <option  selected="selected" value="">--Groupe--</option>
                                   <option value="C">radio et télécommunication</option>
@@ -1187,8 +1191,9 @@ let totalmat = JSON.parse(localStorage.getItem("totalmat")*/
                             </select>
                             <select value={selectedFilter.eta} onChange={e => setSelectedFilter({ ...selectedFilter,eta: e.target.value })}>
                               <option  selected="selected" value="">--état--</option>
-                                  <option selected value="actif">actif</option>
-                                 <option value="en panne">en panne</option>
+                                  <option selected value="bon">BON</option>
+                                 <option value="moyen">MOYEN</option>
+                                 <option value="hors usage">HORS USAGE</option>
                             </select>
                             <select  value={selectedFilter.reg} onChange={e => setSelectedFilter({ ...selectedFilter,reg: e.target.value })} >
                                <option  selected="selected" value="">--Localisation--</option>
@@ -1238,6 +1243,7 @@ let totalmat = JSON.parse(localStorage.getItem("totalmat")*/
                       <th></th>
                     </tr>
                   </thead>
+                  {tokenLocal.role == "administrateur" && (
                   <tbody >
                     {
                    
@@ -1306,14 +1312,14 @@ let totalmat = JSON.parse(localStorage.getItem("totalmat")*/
                             materiels.famille,materiels.categorie,materiels.marque,materiels.statuse,materiels.etat,materiels.fournisseur,
                             materiels.prixmateriel,materiels.dateinventaire,materiels.region,materiels.numerofacture,materiels.numero,materiels.commentaireMateriel) 
                                 
-                          }}class="btn btn-danger btn-rounded" data-mdb-ripple-init sty  style={{fontSize:"14px",width:"155px",height:"40px"}} >editer</button>              
+                          }}class="btn btn-danger btn-rounded" data-mdb-ripple-init sty  style={{fontSize:"14px",width:"150px",height:"40px"}} >editer</button>              
                             ) }
                             <button onClick={()=>{prendre(materiels.idMateriels,materiels.codemateriel,materiels.groupe,
                             materiels.famille,materiels.categorie,materiels.marque,materiels.statuse,materiels.etat,materiels.fournisseur,
                             materiels.prixmateriel,materiels.dateinventaire,materiels.region,materiels.numerofacture
                             
                             )}
-                            } class="btn btn-success btn-rounded" >demander</button>                   
+                            } class="btn btn-success btn-rounded" >voir</button>                   
                                                    
                        </tr> 
                            }  
@@ -1322,7 +1328,96 @@ let totalmat = JSON.parse(localStorage.getItem("totalmat")*/
                                                                           
 )}
                      
-                  </tbody>
+                  </tbody>)}
+
+
+                  {tokenLocal.role != "administrateur" && (
+                  <tbody >
+                    {
+                   
+                   
+                    data
+                    .filter((materiels)=>{return (materiels.codemateriel.includes(searchterm) || materiels.codemateriel.includes(searchterm).toUpperCase || materiels.marque.includes(searchterm) || materiels.marque.includes(searchterm).toUpperCase ||
+                     
+                      materiels.marque.includes(searchterm) || materiels.marque.includes(searchterm).toUpperCase ||
+                      materiels.categorie.includes(searchterm) || materiels.categorie.includes(searchterm).toUpperCase ||
+                     
+                      materiels.commentaireMateriel.includes(searchterm) || materiels.commentaireMateriel.includes(searchterm).toUpperCase 
+                     
+ )}
+
+                    )
+                    .map((materiels,index)=>{
+           
+                    
+                    movies.push([`${materiels.codemateriel}`,`${materiels.groupe}`,`${materiels.categorie}`,
+                                `${materiels.marque}`,
+                                 `${materiels.etat}`,
+                                 `${materiels.dateinventaire}`,
+                                 `${materiels.statuse}`,
+                                 `${materiels.region}`,
+                                 `${materiels.commentaireMateriel}`]
+                    )
+
+                    /*,`${materiels.groupe}`,
+                      `${materiels.categorie}`,`${materiels.marque}`,`${materiels.etat}`,`${materiels.dateinventaire}`,
+                        `${materiels.statuse}`,
+                          `${materiels.region}`,`${materiels.commentaireMateriel}` */
+   
+
+
+                  if ((selectedFilter.fam === '' || selectedFilter.fam === materiels.famille) 
+                      &&
+                      (selectedFilter.reg === '' || selectedFilter.reg === materiels.region)
+                      &&
+                      ('libre' === materiels.statuse)
+                      &&
+                      (selectedFilter.eta === '' || selectedFilter.eta === materiels.etat)
+                      &&
+                      (selectedFilter.gro === '' || selectedFilter.gro === materiels.groupe)
+                      )
+                            { 
+                            return <tr key={index} >
+                            
+                            <td>{materiels.codemateriel}</td>
+                            <td>{materiels.groupe}</td>
+                            <td>{materiels.categorie}</td>
+                            
+                            <td>{materiels.marque}</td>
+                            <td>{materiels.etat}</td>
+                            <td>{dayjs(`${materiels.dateinventaire}`).format("DD/MM/YYYY")}</td>
+                            <td>{materiels.statuse}</td>
+                           
+                            
+                            <td>
+                                {materiels.region}
+
+                            </td>   
+                            <td>{materiels.commentaireMateriel}</td>    
+                            {tokenLocal.role == "administrateur" && (
+                            
+                            <button onClick={()=>{afficher(materiels.idMateriels,materiels.codemateriel,materiels.groupe,
+                            materiels.famille,materiels.categorie,materiels.marque,materiels.statuse,materiels.etat,materiels.fournisseur,
+                            materiels.prixmateriel,materiels.dateinventaire,materiels.region,materiels.numerofacture,materiels.numero,materiels.commentaireMateriel) 
+                                
+                          }}class="btn btn-danger btn-rounded" data-mdb-ripple-init sty  style={{fontSize:"14px",width:"150px",height:"40px"}} >editer</button>              
+                            ) }
+                            <button onClick={()=>{prendre(materiels.idMateriels,materiels.codemateriel,materiels.groupe,
+                            materiels.famille,materiels.categorie,materiels.marque,materiels.statuse,materiels.etat,materiels.fournisseur,
+                            materiels.prixmateriel,materiels.dateinventaire,materiels.region,materiels.numerofacture
+                            
+                            )}
+                            } class="btn btn-success btn-rounded" >voir</button>                   
+                                                   
+                       </tr> 
+                           }  
+                           return null;               
+                                }                             
+                                                                          
+)}
+                     
+                  </tbody>)}
+
                 </Table>
               </CardBody>
             </Card>

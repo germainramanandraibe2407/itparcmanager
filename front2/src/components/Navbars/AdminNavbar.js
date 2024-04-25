@@ -83,6 +83,7 @@ function AdminNavbar(props) {
   const toggleModalSearch = () => {
     setmodalSearch(!modalSearch);
   };
+  
   return (
     <>
       <Navbar className={classNames("navbar-absolute", color)} expand="lg">
@@ -129,7 +130,7 @@ function AdminNavbar(props) {
                 </DropdownMenu>
               </UncontrolledDropdown>
 
-
+            {/*
               {data.map((mouvements, index) => {
                 return (
                   <>
@@ -166,13 +167,15 @@ function AdminNavbar(props) {
                         }
                    </> 
                     )})}
-                   
-                  
-                
+                  */}
+                {data.map((mouvements, index) => {
+                return (  
+                <>
                     <UncontrolledDropdown nav>
                       
                     {tokenLocal.role == "administrateur" &&
                           (
+                            
                       <DropdownToggle
                         caret
                         color="default"
@@ -182,11 +185,11 @@ function AdminNavbar(props) {
                         {data2.map ((mouv,index)=>{ return(
                          <div className="photo">
                             {
-                              mouv.statut?
-                                (<img style={{height:"100%"}} alt="..." src={require("assets/img/Z17w.gif")} />
+                              mouv.statut || mouvements.nbr ?
+                                (<img style={{height:"100%"}} alt="..." src={require("assets/img/Z17w.gif")} onClick={handleclick2}/>
 
                                 ) :
-                                (<img alt="..." src={require("assets/img/bell-black.gif")} />)}
+                                (<img alt="..." src={require("assets/img/bell-black.gif")} onClick={handleclick2} />)}
                           </div>)
                             })}
 
@@ -194,15 +197,10 @@ function AdminNavbar(props) {
                         <p className="d-lg-none">demande retour de materiel</p>
                       </DropdownToggle>)}
           
-                      <DropdownMenu className="dropdown-navbar" right tag="ul">
-                        <DropdownItem divider tag="li" />
-                        <NavLink tag="li">
-                          <DropdownItem className="nav-item" onClick={handleclick2}>demande retour de materiel</DropdownItem>
-                        </NavLink>
-                      </DropdownMenu>
+                     
                     </UncontrolledDropdown>
-                  
-                   
+                  </>
+                )})}
                
 
 

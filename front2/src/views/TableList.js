@@ -85,7 +85,7 @@ if (values.id){
             <Card>
               <CardHeader>
                 <CardTitle tag="h4">liste des utilisateurs</CardTitle>
-                <button>imprimer</button>
+                {/*<button>imprimer</button>*/}
                 </CardHeader>
               <CardBody>
                 <Table className="tablesorter" responsive>
